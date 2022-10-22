@@ -737,7 +737,7 @@ class API(
         speed: Optional[float] = None,
         home_flagged_axes: bool = True,
         max_speeds: Optional[Dict[Axis, float]] = None,
-        acquire_lock: bool = True,
+        acquire_lock: bool = False,# was True,
         check_bounds: MotionChecks = MotionChecks.NONE,
     ) -> None:
         """Worker function to apply robot motion.

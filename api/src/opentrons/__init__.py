@@ -186,3 +186,6 @@ async def initialize() -> ThreadManagedHardware:
             await blink_task
         except asyncio.CancelledError:
             pass
+
+
+print("Rick dev!")

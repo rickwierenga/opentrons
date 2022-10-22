@@ -202,6 +202,8 @@ class SmoothieDriver:
         #: Cache of currently configured splits from callers
         self._axes_moved_at = AxisMoveTimestamp(AXES)
 
+        self.use_wait = True
+
     @property
     def gpio_chardev(self) -> GPIODriverLike:
         return self._gpio_chardev
@@ -727,9 +729,10 @@ class SmoothieDriver:
         for axis, value in sorted(self.current.items()):
             command.add_float(prefix=axis, value=value, precision=None)
 
-        command.add_gcode(gcode=GCODE.DWELL).add_float(
-            prefix="P", value=CURRENT_CHANGE_DELAY, precision=None
-        )
+        # was dwell
+        #command.add_gcode(gcode=GCODE.DWELL).add_float(
+        #    prefix="P", value=CURRENT_CHANGE_DELAY, precision=None
+        #)
         log.debug(f"_generate_current_command: {command}")
         return command
 
@@ -884,6 +887,9 @@ class SmoothieDriver:
                 await self.home(error_axis)
             raise SmoothieError(se.ret_code, str(command))
 
+    def set_use_wait(self, use_wait):
+      self.use_wait = use_wait
+
     async def _send_command_unsynchronized(
         self, command: CommandBuilder, ack_timeout: float, execute_timeout: float
     ) -> str:
@@ -893,12 +899,16 @@ class SmoothieDriver:
             command_result = await self._connection.send_command(
                 command=command, retries=DEFAULT_COMMAND_RETRIES, timeout=ack_timeout
             )
-            wait_command = CommandBuilder(
-                terminator=SMOOTHIE_COMMAND_TERMINATOR
-            ).add_gcode(gcode=GCODE.WAIT)
-            await self._connection.send_command(
-                command=wait_command, retries=0, timeout=execute_timeout
-            )
+            if self.use_wait:
+                wait_command = CommandBuilder(
+                    terminator=SMOOTHIE_COMMAND_TERMINATOR
+                ).add_gcode(gcode=GCODE.WAIT)
+                print("dont skip!")
+                await self._connection.send_command(
+                    command=wait_command, retries=0, timeout=execute_timeout
+                )
+            else:
+                print("skip!")
         except AlarmResponse as e:
             self._handle_return(ret_code=e.response, is_alarm=True)
         except ErrorResponse as e:

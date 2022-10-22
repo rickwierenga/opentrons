@@ -5,7 +5,7 @@ from __future__ import annotations
 from abc import abstractmethod, ABC
 from typing import Dict, Generic, Optional, Union
 
-from opentrons_shared_data.pipette.dev_types import PipetteNameType
+#from opentrons_shared_data.pipette.dev_types import PipetteNameType
 from opentrons.types import Mount, Location, DeckSlotName
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.modules.types import ModuleModel
@@ -78,7 +78,8 @@ class AbstractProtocol(
 
     @abstractmethod
     def load_instrument(
-        self, instrument_name: PipetteNameType, mount: Mount
+        self, instrument_name, #: PipetteNameType,
+        mount: Mount
     ) -> InstrumentCoreType:
         ...
 
